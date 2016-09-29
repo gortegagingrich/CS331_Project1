@@ -13,6 +13,29 @@ import java.util.Random;
  */
 public class Project1 {
 
+    public static void performMultiplication(int nTimes, int mSize) {
+	SqrMatrix mat1, mat2;
+
+	for (int i = 0; i < nTimes; i++) {
+	    mat1 = new SqrMatrix(mSize);
+	    mat2 = new SqrMatrix(mSize);
+
+	    printResult(mat1.classicMult(mat2));
+	}
+    }
+
+    public static void printResult(int[][] result) {
+	for (int[] list: result) {
+	    System.out.print("[\t");
+	    
+	    for (int i: list) {
+		System.out.print(i + "\t");
+	    }
+
+	    System.out.println("\t]");
+	}
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -91,5 +114,17 @@ class SqrMatrix {
         }
         
         return result;
+    }
+
+    public int[][] dandcMult(SqrMatrix mat) {
+	int[][] result = new int[values.length][values.length];
+
+	return result;
+    }
+
+    public int[][] strassenMult(SqrMatrix mat) {
+	int[][] result = new int[values.length][values.length];
+
+	return result;
     }
 }
