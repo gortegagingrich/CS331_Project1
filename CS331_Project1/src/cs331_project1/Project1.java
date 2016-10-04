@@ -16,15 +16,21 @@ public class Project1 {
     public static void performMultiplication(int nTimes, int mSize) {
 	SqrMatrix mat1, mat2;
         int i;
+        long time;
+        
+        mat1 = new SqrMatrix(mSize);
+        mat2 = new SqrMatrix(mSize);
 
 	for (i = 0; i < nTimes; i++) {
-	    mat1 = new SqrMatrix(mSize);
-	    mat2 = new SqrMatrix(mSize);
-
-	    printResult(mat1.classicMult(mat2));
-            System.out.println();
-            printResult(mat1.strassenMult(mat2));
-            System.out.println("\n");
+	    time = System.nanoTime();
+            mat1.classicMult(mat2);
+            time = System.nanoTime() - time;
+            // printing the results takes longer than the multiplication, so 
+            // there's no real point in doing it
+	    //printResult(mat1.classicMult(mat2));
+            System.out.println("n = " + mSize + "     \ttime = " + ((double)(time) / 1000000000));
+            //printResult(mat1.strassenMult(mat2));
+            //System.out.println("\n");
 	}
     }
 
@@ -36,7 +42,7 @@ public class Project1 {
 		System.out.print(i + "\t");
 	    }
 
-	    System.out.println("\t]");
+	    System.out.println("   \t]");
 	}
     }
     
@@ -46,7 +52,9 @@ public class Project1 {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        performMultiplication(2,2);
+        for (int i = 2; i <= 4096; i *= 2) {
+            performMultiplication(1,i);
+        }
     }
     
 }
