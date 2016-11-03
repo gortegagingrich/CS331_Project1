@@ -20,7 +20,7 @@ public class Project1 {
         
         mat1 = new SqrMatrix(mSize);
         mat2 = new SqrMatrix(mSize);
-        
+        System.out.println("\n");
         // strassen
 	for (i = 0; i < nTimes; i++) {
 	    time = System.nanoTime();
@@ -28,7 +28,7 @@ public class Project1 {
             time = System.nanoTime() - time;
             // printing the results takes longer than the multiplication, so 
             // there's no real point in doing it
-            System.out.println("\nStrassen: n = " + mSize + "     \ttime = " + ((double)(time) / 1000000000));
+            System.out.println("Strassen: n = " + mSize + "     \ttime = " + ((double)(time) / 1000000000));
             //System.out.println("\n");
 	}
         
@@ -39,12 +39,13 @@ public class Project1 {
             System.out.println("Classic: n = " + mSize + "     \ttime = " + ((double)(time) / 1000000000));
 	}
         
+        /*
         for (i = 0; i < nTimes; i++) {
             time = System.nanoTime();
             mat1.dandcMult(mat2);
             time = System.nanoTime() - time;
             System.out.println("DandC: n = " + mSize + "     \ttime = " + ((double)(time) / 1000000000));
-        }
+        }*/
     }
 
     public static void printResult(int[][] result) {
@@ -65,8 +66,8 @@ public class Project1 {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        for (int i = 2; i <= 2048; i *= 2) {
-            performMultiplication(1,i);
+        for (int i = 2; i <= 4096; i *= 2) {
+            performMultiplication(10,i);
         }
     }
     
@@ -76,15 +77,17 @@ class SqrMatrix {
     int[][] values;
     Random rand;
     
+    private static int[][] tempA = new int[4096][4096];
+    private static int[][] tempB = new int[4096][4096];
+    private static int[][] zero = new int[4096][4096];
+    
     /**
      * creates nxn matrix
      * @param n 
      */
     SqrMatrix(int n) {
-        values = new int[n][n];
-        //rand = new Random();
         
-        //fillValues();
+        values = new int[n][n];
     }
     
     private void fillValues() {
@@ -154,11 +157,6 @@ class SqrMatrix {
         } else {
             n /= 2;
             
-            int[][] temp1 = new int[n][n];
-            int[][] temp2 = new int[n][n];
-            
-            int[][] zero = new int[n][n];
-            
             p = new int[n][n];
             q = new int[n][n];
             r = new int[n][n];
@@ -167,49 +165,53 @@ class SqrMatrix {
             u = new int[n][n];
             v = new int[n][n];
             
-            add(n, in1, a, b, in1, a+n, b+n, temp1, 0, 0);
-            add(n, in2, a, b, in2, a+n, b+n, temp2, 0, 0);
-            strassen(n, 0, 0, temp1, temp2, p);
+            // first recurssive call
+            add(n, in1, a, b, in1, a+n, b+n, tempA, 0, 0);
+            add(n, in2, a, b, in2, a+n, b+n, tempB, 0, 0);
+            strassen(n, 0, 0, tempA, tempB, p);
             
-            add(n, in1, a + n, b, in1, a+n, b+n, temp1, 0, 0);
-            strassen(n, 0, 0, temp1, in2, q);
+            // second recurssive call
+            add(n, in1, a + n, b, in1, a+n, b+n, tempA, 0, 0);
+            strassen(n, 0, 0, tempA, in2, q);
             
-            sub(n, in2, a, b+n, in2, a+n, b+n, temp1, 0, 0);
-            strassen(n,0,0,in1,temp1,r);
+            // third recurssive call
+            sub(n, in2, a, b+n, in2, a+n, b+n, tempA, 0, 0);
+            strassen(n,0,0,in1,tempA,r);
             
-            sub(n, in2, a+n, b+n, in2, a, b, temp1, 0, 0);
-            strassen(n,0,0,in1,temp1,s);
+            // fourth recurssive call
+            sub(n, in2, a+n, b+n, in2, a, b, tempA, 0, 0);
+            strassen(n,0,0,in1,tempA,s);
             
-            add(n, in1, a, b, in1, a, b+1, temp1, 0, 0);
-            add(n, in2, a+1, b+1, zero, 0, 0, temp2, 0, 0);
-            strassen(n, 0, 0, temp1, temp2, t);
+            // fifth recurssive call
+            add(n, in1, a, b, in1, a, b+1, tempA, 0, 0);
+            add(n, in2, a+1, b+1, zero, 0, 0, tempB, 0, 0);
+            strassen(n, 0, 0, tempA, tempB, t);
             
-            sub(n, in1, a+1, b, in1, a, b, temp1, 0, 0);
-            add(n, in2, a, b, in2, a, b+n, temp2, 0, 0);
-            strassen(n, 0, 0, temp1, temp2, u);
+            // sixth recurssive call
+            sub(n, in1, a+1, b, in1, a, b, tempA, 0, 0);
+            add(n, in2, a, b, in2, a, b+n, tempB, 0, 0);
+            strassen(n, 0, 0, tempA, tempB, u);
             
-            sub(n, in1, a, b+1, in1, a+1, b+1, temp1, 0, 0);
-            add(n, in2, a+1, b, in2, a+1, b+n, temp2, 0, 0);
-            strassen(n, 0, 0, temp1, temp2, v);
+            // seventh recurssive call
+            sub(n, in1, a, b+1, in1, a+1, b+1, tempA, 0, 0);
+            add(n, in2, a+1, b, in2, a+1, b+n, tempB, 0, 0);
+            strassen(n, 0, 0, tempA, tempB, v);
             
-            // C11
-            add(n,p,0,0,s,0,0,out,0,0);
-            add(n,out,0,0,v,0,0,out,0,0);
-            sub(n,out,0,0,t,0,0,out,0,0);
+            // set C11
+            add(n,p,0,0,s,0,0,zero,0,0);
+            add(n,zero,0,0,v,0,0,zero,0,0);
+            sub(n,zero,0,0,t,0,0,out,0,0);
             
-            //c12
+            // set c12
             add(n,r,0,0,t,0,0,out,0,n);
             
-            //c21
+            // set c21
             add(n,q,0,0,s,0,0,out,n,0);
             
-            //c22
-            add(n,p,0,0,r,0,0,out,n,n);
-            sub(n,out,n,n,q,0,0,out,n,n);
-            add(n,u,0,0,out,n,n,out,n,n);
-            
-            // todo: write a method for setting parts of a matrix to the values
-            // in another
+            // set c22
+            add(n,p,0,0,r,0,0,zero,n,n);
+            sub(n,zero,n,n,q,0,0,zero,n,n);
+            add(n,u,0,0,zero,n,n,out,n,n);
         }
     }
     
@@ -229,16 +231,6 @@ class SqrMatrix {
         for (i = 0; i < n; i++) {
             for(j = 0; j < n; j++) {
                 out[a+i][b+j] = in1[a1+i][b1+j] - in2[a2+i][b2+j];
-            }
-        }
-    }
-    
-    private void set0(int n, int[][] in1, int a1, int b1, int[][] out, int a, int b) {
-        int i, j;
-        
-        for (i = 0; i < n; i++) {
-            for(j = 0; j < n; j++) {
-                out[a+i][b+j] = 0;
             }
         }
     }
