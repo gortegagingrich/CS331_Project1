@@ -58,7 +58,7 @@ public class Project1 {
         // TODO code application logic here
 
       for (int i = 2; i <= 4096; i *= 2) {
-         performMultiplication(1, i);
+         performMultiplication(10, i);
       }
    }
 
